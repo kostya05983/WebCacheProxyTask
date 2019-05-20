@@ -60,7 +60,7 @@ internal class ProxyVerticleTest {
                 }
             }
         }
-        context.awaitCompletion(120000, TimeUnit.SECONDS)
+        context.awaitCompletion(120_000, TimeUnit.SECONDS)
         println("Time ${(System.currentTimeMillis() - startTime) / (limit * limit * limit)}")
     }
 
@@ -85,6 +85,6 @@ internal class ProxyVerticleTest {
                 }
             }
         }
-        context.awaitCompletion(120000, TimeUnit.SECONDS)
+        context.awaitCompletion(120_000, TimeUnit.SECONDS)
     }
 }
