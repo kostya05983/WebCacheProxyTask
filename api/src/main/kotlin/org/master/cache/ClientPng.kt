@@ -1,14 +1,18 @@
 package org.master.cache
 
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.apache.Apache
-import io.ktor.client.request.get
+
+import io.vertx.rxjava.core.Vertx
+import io.vertx.rxjava.core.buffer.Buffer
+import io.vertx.rxjava.ext.web.client.HttpResponse
+import io.vertx.rxjava.ext.web.client.WebClient
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
+import reactor.core.publisher.toMono
+import rx.Single
 import java.util.concurrent.ConcurrentHashMap
 
-class ClientPng {
+class ClientPng(val vertx: Vertx) {
 
     companion object {
         private const val SOCKET_TIMEOUT = 10_000
@@ -16,32 +20,27 @@ class ClientPng {
         private const val CONNECTION_REQUEST_TIMEOUT = 20_000
     }
 
-    lateinit var client: HttpClient
+    lateinit var client: WebClient
 
     init {
-        client = HttpClient(Apache) {
-            engine {
-                socketTimeout = SOCKET_TIMEOUT
-                connectTimeout = CONNECT_TIMEOUT
-                connectionRequestTimeout = CONNECTION_REQUEST_TIMEOUT
-            }
-        }
+        client = WebClient.create(vertx)
     }
 
     private val currentRequestMemory: ConcurrentHashMap<String, Deferred<ByteArray>> = ConcurrentHashMap()
 
-    suspend fun get(xyz: String): ByteArray {
-        if (currentRequestMemory.contains(xyz)) {
-            val deferred = currentRequestMemory[xyz]
-            val bytes = deferred?.await() //TODO retry if request failed
-            return bytes!!
-        } else {
-            currentRequestMemory[xyz] = GlobalScope.async {
-                client.get<ByteArray>("https://a.tile.openstreetmap.org/${xyz}")
-            }
-            val bytes = currentRequestMemory[xyz]!!.await()
-            currentRequestMemory.remove(xyz)
-            return bytes
-        }
-    }
+//    suspend fun get(xyz: String):  {
+//        return if (currentRequestMemory.contains(xyz)) {
+//            val deferred = currentRequestMemory[xyz]
+//            val bytes = deferred?.await() //TODO retry if request failed
+//            bytes!!
+//        } else {
+//            val rxSend: Single<HttpResponse<Buffer>> = client.get("https://a.tile.openstreetmap.org/$xyz").rxSend()
+//
+//            rxSend
+//        }
+//
+//        val bytes = currentRequestMemory[xyz]!!.await()
+//        currentRequestMemory.remove(xyz)
+//        bytes
+//    }
 }

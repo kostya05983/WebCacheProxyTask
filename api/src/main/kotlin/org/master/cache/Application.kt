@@ -1,23 +1,12 @@
 package org.master.cache
 
-import io.ktor.application.*
-import io.ktor.http.*
-import io.ktor.response.*
-import io.ktor.routing.*
-import io.ktor.server.engine.*
-import io.ktor.server.netty.*
-import org.master.cache.controller.MapPartController
+import io.vertx.core.Vertx
+import org.master.cache.verticles.ProxyVerticle
 
 
-fun main(args: Array<String>) {
-    val controller = MapPartController()
-    val server = embeddedServer(Netty, port = 8080) {
-        routing {
-            get("/") {
+fun main() {
+    val vertx = Vertx.vertx()
+    vertx.deployVerticle(ProxyVerticle())
 
-                call.respondText("Hello World!", ContentType.Text.Plain)
-            }
-        }
-    }
-    server.start(wait = true)
 }
+

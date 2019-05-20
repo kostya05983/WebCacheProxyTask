@@ -18,7 +18,8 @@ class DiskApiImpl : DiskApi {
 
     override fun readFile(name: String): Flux<Byte> {
         val stream = FileInputStream("$PATH_DIR/$name")
-        return Flux.fromArray(stream.readAllBytes().toTypedArray())
+
+        return Flux.fromArray(stream.readBytes().toTypedArray())
     }
 
     override fun writeFile(name: String, bytes: ByteArray): Mono<Unit> {
