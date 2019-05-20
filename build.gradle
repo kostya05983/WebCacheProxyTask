@@ -26,6 +26,5 @@ allprojects {
 }
 
 
-build.dependsOn tasks.getByPath(':core:testClasses')
 
 

@@ -1,46 +1,42 @@
 package org.master.cache
 
 
-import io.vertx.rxjava.core.Vertx
-import io.vertx.rxjava.core.buffer.Buffer
-import io.vertx.rxjava.ext.web.client.HttpResponse
-import io.vertx.rxjava.ext.web.client.WebClient
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
+import io.vertx.core.http.HttpMethod
+import io.vertx.reactivex.core.Vertx
+import io.vertx.reactivex.core.buffer.Buffer
+import io.vertx.reactivex.ext.web.client.HttpResponse
+import io.vertx.reactivex.ext.web.client.WebClient
+
+import org.apache.logging.log4j.LogManager
+import org.master.cache.cache.DiskApiImpl
+import reactor.core.publisher.Mono
 import reactor.core.publisher.toMono
-import rx.Single
 import java.util.concurrent.ConcurrentHashMap
 
-class ClientPng(val vertx: Vertx) {
-
+/**
+ * Client for getting png images
+ * @author kostya05983
+ */
+class ClientPng(vertx: Vertx) {
     companion object {
-        private const val SOCKET_TIMEOUT = 10_000
-        private const val CONNECT_TIMEOUT = 10_000
-        private const val CONNECTION_REQUEST_TIMEOUT = 20_000
+        private const val DOMAIN = "https://a.tile.openstreetmap.org"
     }
 
-    lateinit var client: WebClient
+    private var client: WebClient = WebClient.create(vertx)
 
-    init {
-        client = WebClient.create(vertx)
+    private val currentRequestMemory: ConcurrentHashMap<String, Mono<HttpResponse<Buffer>>> = ConcurrentHashMap()
+
+    fun getResponse(x: String, y: String, z: String): Mono<HttpResponse<Buffer>> {
+        val name = "$x$y$z"
+        return if (currentRequestMemory.containsKey(name)) {
+            currentRequestMemory[name]!! //TODO retry request if failed
+        } else {
+            val mono = client.requestAbs(HttpMethod.GET, "$DOMAIN/$x/$y/$z")
+                    .rxSend().toFlowable().doOnSubscribe {
+                        currentRequestMemory.remove(name)
+                    }.toMono()
+            currentRequestMemory[name] = mono
+            mono
+        }
     }
-
-    private val currentRequestMemory: ConcurrentHashMap<String, Deferred<ByteArray>> = ConcurrentHashMap()
-
-//    suspend fun get(xyz: String):  {
-//        return if (currentRequestMemory.contains(xyz)) {
-//            val deferred = currentRequestMemory[xyz]
-//            val bytes = deferred?.await() //TODO retry if request failed
-//            bytes!!
-//        } else {
-//            val rxSend: Single<HttpResponse<Buffer>> = client.get("https://a.tile.openstreetmap.org/$xyz").rxSend()
-//
-//            rxSend
-//        }
-//
-//        val bytes = currentRequestMemory[xyz]!!.await()
-//        currentRequestMemory.remove(xyz)
-//        bytes
-//    }
 }
