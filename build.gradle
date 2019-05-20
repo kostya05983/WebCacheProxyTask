@@ -5,7 +5,8 @@ group 'WebCacheProxy'
 apply plugin: "application"
 version '1.0-SNAPSHOT'
 
-//mainClassName = "org.goo.EntryPointKt"
+mainClassName = "org.master.cache.ApplicationKt"
+
 
 allprojects {
     group 'WebCacheProxy'

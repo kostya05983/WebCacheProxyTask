@@ -17,6 +17,9 @@ fun main() {
     vertx.deployVerticle(ProxyVerticle(), options)
 }
 
+/**
+ * Load config for server
+ */
 fun loadConfig(): JsonObject {
     return JsonObject(Files.readAllLines(Paths.get("/etc/proxyCache/config.json")).joinToString(""))
 }

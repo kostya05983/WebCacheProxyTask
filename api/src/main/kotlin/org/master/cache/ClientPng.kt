@@ -29,7 +29,7 @@ class ClientPng(vertx: Vertx) {
     fun getResponse(x: String, y: String, z: String): Mono<HttpResponse<Buffer>> {
         val name = "$x$y$z"
         return if (currentRequestMemory.containsKey(name)) {
-            currentRequestMemory[name]!! //TODO retry request if failed
+            currentRequestMemory[name]!!
         } else {
             val mono = client.requestAbs(HttpMethod.GET, "$DOMAIN/$x/$y/$z")
                     .rxSend().toFlowable().doOnSubscribe {

@@ -3,23 +3,20 @@ plugins {
     id "com.github.johnrengelman.shadow" version "4.0.4"
 }
 
+mainClassName = "org.master.cache.ApplicationKt"
 
 dependencies {
     compile group: 'io.projectreactor', name: 'reactor-core', version: '3.2.9.RELEASE'
 
     compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.2'
-// https://mvnrepository.com/artifact/io.vertx/vertx-web
+
     compile group: 'io.vertx', name: 'vertx-web', version: '3.7.0'
-// https://mvnrepository.com/artifact/io.vertx/vertx-core
     compile group: 'io.vertx', name: 'vertx-core', version: '3.7.0'
-// https://mvnrepository.com/artifact/io.vertx/vertx-lang-kotlin-coroutines
     compile group: 'io.vertx', name: 'vertx-lang-kotlin-coroutines', version: '3.7.0'
-// https://mvnrepository.com/artifact/io.vertx/vertx-web-client
     compile group: 'io.vertx', name: 'vertx-web-client', version: '3.7.0'
+    compile group: 'io.vertx', name: 'vertx-rx-java2', version: '3.7.0'
 
-// https://mvnrepository.com/artifact/io.vertx/vertx-rx-java
-    compile group: 'io.vertx', name: 'vertx-rx-java', version: '3.7.0'
-
+    testCompile group: 'io.vertx', name: 'vertx-junit5', version: '3.7.0'
     testCompile group: 'io.projectreactor', name: 'reactor-test', version: '3.2.9.RELEASE'
     testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.3.2'
 }

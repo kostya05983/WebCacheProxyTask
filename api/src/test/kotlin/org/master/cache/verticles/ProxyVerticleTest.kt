@@ -1,7 +1,9 @@
 package org.master.cache.verticles
 
+import io.vertx.core.DeploymentOptions
 import io.vertx.core.Vertx
 import io.vertx.core.http.HttpMethod
+import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.client.WebClient
 import io.vertx.junit5.Checkpoint
 import io.vertx.junit5.VertxExtension
@@ -10,6 +12,8 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
+import java.nio.file.Files
+import java.nio.file.Paths
 import java.util.concurrent.TimeUnit
 
 @ExtendWith(VertxExtension::class)
@@ -18,11 +22,16 @@ internal class ProxyVerticleTest {
 
     lateinit var client: WebClient
 
+    /**
+     * Set up our web client and verticle to proxy our requests
+     */
     @BeforeAll
     fun setUp(vertx: Vertx, context: VertxTestContext) {
         client = WebClient.create(vertx)
-
-        vertx.deployVerticle(ProxyVerticle(), context.completing())
+        val resource = javaClass.classLoader.getResource("config.json").file
+        val config = JsonObject(Files.readAllLines(Paths.get(resource)).joinToString(""))
+        val options = DeploymentOptions().setConfig(config)
+        vertx.deployVerticle(ProxyVerticle(), options, context.completing())
     }
 
     private fun sendRequest(context: VertxTestContext, checkPoint: Checkpoint, request: String) {
@@ -35,6 +44,9 @@ internal class ProxyVerticleTest {
         }
     }
 
+    /**
+     * Test sequential responses
+     */
     @Test
     fun testAllResponse(context: VertxTestContext) {
         val limit = 9
@@ -48,10 +60,13 @@ internal class ProxyVerticleTest {
                 }
             }
         }
-        context.awaitCompletion(40000, TimeUnit.SECONDS)
+        context.awaitCompletion(120000, TimeUnit.SECONDS)
         println("Time ${(System.currentTimeMillis() - startTime) / (limit * limit * limit)}")
     }
 
+    /**
+     * Test parallel responses for condition, not to send twice request to openstreetMap
+     */
     @Test
     fun testParallelRequest(context: VertxTestContext) {
         val limit = 9
@@ -70,6 +85,6 @@ internal class ProxyVerticleTest {
                 }
             }
         }
-        context.awaitCompletion(60000, TimeUnit.SECONDS)
+        context.awaitCompletion(120000, TimeUnit.SECONDS)
     }
 }

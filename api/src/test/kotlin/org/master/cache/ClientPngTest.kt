@@ -7,9 +7,11 @@ import reactor.test.StepVerifier
 
 internal class ClientPngTest {
 
-
+    /**
+     * Just test getImage, other cases testing in ProxyVerticleTest
+     */
     @Test
-    fun text() {
+    fun testGetImage() {
         val vertx = Vertx.vertx()
         val clientPng = ClientPng(vertx)
         val test = clientPng.getResponse("1", "2", "3")

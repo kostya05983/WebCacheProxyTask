@@ -6,6 +6,9 @@ import reactor.test.StepVerifier
 
 internal class DiskApiImplTest {
 
+    /**
+     * Test for getting file, use sepearte testDirectory
+     */
     @Test
     fun testGetFiles() {
         val resource = javaClass.classLoader.getResource("testData/getFilesTest").file
@@ -17,6 +20,9 @@ internal class DiskApiImplTest {
         }.verifyComplete()
     }
 
+    /**
+     * ReadFile from resources for test
+     */
     @Test
     fun testReadFile() {
         val resource = javaClass.classLoader.getResource("testData/getFilesTest").file
@@ -27,6 +33,9 @@ internal class DiskApiImplTest {
         }.verifyComplete()
     }
 
+    /**
+     * And write file to resources dir for test and than read this
+     */
     @Test
     fun testWriteToFile() {
         val resource = javaClass.classLoader.getResource("testData/").file
