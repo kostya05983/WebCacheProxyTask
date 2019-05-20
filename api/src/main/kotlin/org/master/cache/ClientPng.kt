@@ -37,7 +37,7 @@ class ClientPng {
             return bytes!!
         } else {
             currentRequestMemory[xyz] = GlobalScope.async {
-                client.get<ByteArray>("https://a.tile.openstreetmap.org/xyz")
+                client.get<ByteArray>("https://a.tile.openstreetmap.org/${xyz}")
             }
             val bytes = currentRequestMemory[xyz]!!.await()
             currentRequestMemory.remove(xyz)
