@@ -6,10 +6,10 @@ This is the server for proxy map tiles to openStreet map
 
 With gradle 5.4 and java 11.0.2 
 
-1. Run gradle build in up directory
+1. Move config.json from /api/main/resources to /etc/proxyCache, or you ca change 
+   this path in api/main/kotlin/ApplicationKt 
 
-2. Move config.json from /api/main/resources to /etc/proxyCache, or you ca change 
-this path in api/main/kotlin/ApplicationKt
+2. Run gradle build in up directory
 
 3. Next  java -jar api/build/libs/api-1.0-SNAPSHOT.jar
 
