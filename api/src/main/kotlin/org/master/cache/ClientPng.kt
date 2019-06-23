@@ -11,7 +11,9 @@ import org.apache.logging.log4j.LogManager
 import org.master.cache.cache.DiskApiImpl
 import reactor.core.publisher.Mono
 import reactor.core.publisher.toMono
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.locks.ReentrantLock
 
 /**
  * Client for getting png images
@@ -24,19 +26,26 @@ class ClientPng(vertx: Vertx) {
 
     private var client: WebClient = WebClient.create(vertx)
 
-    private val currentRequestMemory: ConcurrentHashMap<String, Mono<HttpResponse<Buffer>>> = ConcurrentHashMap()
+    private val lock = ReentrantLock()
+
+    private val currentRequestMemory: WeakHashMap<String, Mono<HttpResponse<Buffer>>> = WeakHashMap()
 
     fun getResponse(x: String, y: String, z: String): Mono<HttpResponse<Buffer>> {
         val name = "$x$y$z"
-        return if (currentRequestMemory.containsKey(name)) {
-            currentRequestMemory[name]!!
-        } else {
-            val mono = client.requestAbs(HttpMethod.GET, "$DOMAIN/$x/$y/$z")
-                    .rxSend().toFlowable().doOnSubscribe {
-                        currentRequestMemory.remove(name)
-                    }.toMono()
-            currentRequestMemory[name] = mono
-            mono
+        while (lock.isLocked) {
+            val contain = currentRequestMemory[name]
+            if (contain != null) {
+                return contain
+            }
         }
+        lock.lock()
+        val mono = client.requestAbs(HttpMethod.GET, "$DOMAIN/$x/$y/$z")
+                .rxSend().toFlowable().doOnSubscribe {
+                    currentRequestMemory.remove(name)
+                }.toMono()
+        currentRequestMemory[name] = mono
+        val res = mono
+        lock.unlock()
+        return res
     }
 }

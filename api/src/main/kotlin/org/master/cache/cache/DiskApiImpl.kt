@@ -26,8 +26,14 @@ class DiskApiImpl(private val path: String) : DiskApi {
      */
     override fun readFile(name: String): Flux<Byte> {
         val stream = FileInputStream("$path/$name")
-        return Flux.fromArray(stream.readBytes().toTypedArray()).doAfterTerminate {
-            stream.close()
+
+        return Flux.generate<Byte> {
+            Thread {
+                while (stream.available() > 0) {
+                    it.next(stream.read().toByte())
+                }
+                it.complete()
+            }.start()
         }
     }
 
